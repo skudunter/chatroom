@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DANIEL CODE GO BRR</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        h1 {
+            display: flex;
+            justify-content: center;
+        }
+
+        body {
+            margin: 0;
+            padding-bottom: 3rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #form {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 0.25rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            height: 3rem;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
+
+        #input {
+            border: none;
+            padding: 0 1rem;
+            flex-grow: 1;
+            border-radius: 2rem;
+            margin: 0.25rem;
+            display: none;
+
+        }
+
+        #username {
+            border: none;
+            padding: 0 1rem;
+            flex-grow: 1;
+            border-radius: 2rem;
+            margin: 0.25rem;
+            width: 10px;
+        }
+
+        #input:focus {
+            outline: none;
+        }
+
+        #form>button {
+            background: #333;
+            border: none;
+            padding: 0 1rem;
+            margin: 0.25rem;
+            border-radius: 3px;
+            outline: none;
+            color: #fff;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages>li {
+            padding: 0.5rem 1rem;
+        }
+
+        #messages>li:nth-child(odd) {
+            background: #efefef;
+        }
+
+        b,
+        label {
+            margin-top: 0.05%;
+            font-size: larger;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #input-label {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>DANIEL SE COOL MESSAGING APP</h1>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+        <b><label for="username" id='username-label'>username:</label></b>
+        <input id="username">
+        <b><label for="input" id="input-label">Text:</label></b>
+        <input id="input" autocomplete="off" /><button>Send</button>
+    </form>
+    <script>
+        const socket = io();
+        var form = document.getElementById('form');
+        var input = document.getElementById('input');
+        var messages = document.getElementById('messages');
+        var username = document.getElementById('username');
+        var username_label = document.getElementById('username-label');
+        var input_label = document.getElementById('input-label');
+        var myUsername;
+        const random_hex_color_code = () => {
+            let n = (Math.random() * 0xfffff * 1000000).toString(16);
+            return '#' + n.slice(0, 6);
+        };
+        var textColor = random_hex_color_code();
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('message sent', myUsername + ': ' + input.value)
+                input.value = '';
+            }
+            else if (username.value) {
+                myUsername = username.value;
+                socket.emit('user register', myUsername)
+                username.value = '';
+                username.style.display = 'none';
+                username_label.style.display = 'none';
+                input.style.display = 'flex';
+                input_label.style.display = 'flex';
+            }
+            else {
+                window.prompt('fill in boths inputs pls xd(dont fill this one in)');
+            }
+        });
+
+        socket.on('message sent', (msg) => {
+            var list = document.createElement('li');
+            list.textContent = msg;
+            list.style.color = textColor;
+            messages.appendChild(list);
+            window.scrollTo(0, document.body.scrollHeight);
+        })
+
+        socket.on('user register', (username) => {
+            var list = document.createElement('li');
+            list.textContent = username;
+            list.style.color = '#000000';
+            list.style.fontWeight = 'bold';
+            messages.appendChild(list);
+            window.scrollTo(0, document.body.scrollHeight);
+        })
+        socket.on('users array update', (users) => {
+            let amount = document.createElement('li');
+            amount.textContent = 'USERS ONLINE:';
+            messages.appendChild(amount);
+            for (i = 0; i < users.length; i++) {
+                var list = document.createElement('ul');
+                list.style = 'list-style-type:disc';
+                list.textContent = users[i];
+                list.style.color = '#00FF00';
+                list.fontSize = '1px'
+                list.style.fontWeight = 'bold';
+                messages.appendChild(list);
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        })
+        socket.on('disconnect', () => {
+            if (myUsername) {
+                var list = document.createElement('ul');
+                list.style = 'list-style-type:disc';
+                list.textContent = myUsername + ' has disconnected';
+                list.style.color = '#FF0000';
+                list.fontSize = '1px'
+                list.style.fontWeight = 'bold';
+                messages.appendChild(list);
+                window.scrollTo(0, document.body.scrollHeight);
+                socket.emit('clear array', myUsername);
+            }
+
+        })
+
+    </script>
+</body>
+
+</html>
