@@ -8,9 +8,9 @@ var users = [];
 
 
 app.get('/', (req, res) => {
-  res.sendFile('C:/Users/Daniel/Code/node-js/chatroom/index.html');
+  res.sendFile(__dirname+"/index.html");
 })
-server.listen(process.env.PORT)
+server.listen(80)
 
 io.on('connection', (socket) => {
   console.log('a user connected');
